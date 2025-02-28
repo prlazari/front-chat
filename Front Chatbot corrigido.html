@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot IA</title>
+    <style>
+        :root {
+            --primary-color: #5e72e4;
+            --secondary-color: #f7fafc;
+            --text-color: #333;
+            --light-text: #777;
+            --bot-bg: #f1f3f5;
+            --user-bg: #5e72e4;
+            --user-text: white;
+            --border-radius: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fe;
+            color: var(--text-color);
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 75%;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background-color: var(--bot-bg);
+            color: var(--text-color);
+            border-top-left-radius: 5px;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+
+        .user-message {
+            background-color: var(--user-bg);
+            color: var(--user-text);
+            border-top-right-radius: 5px;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--light-text);
+            margin-top: 5px;
+            align-self: flex-end;
+        }
+
+        .typing-indicator {
+            display: flex;
+            padding: 10px 15px;
+            background-color: var(--bot-bg);
+            border-radius: var(--border-radius);
+            width: fit-content;
+            margin-bottom: 15px;
+            display: none; 
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--light-text);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing-animation 1s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-animation {
+            0% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-5px); }
+            100% { opacity: 0.3; transform: translateY(0); }
+        }
+
+        .chat-footer {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .chat-input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid #dfe1e5;
+            border-radius: 20px;
+            padding: 12px 15px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(94, 114, 228, 0.2);
+        }
+
+        .send-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #4558be;
+        }
+
+        .send-button:disabled {
+            background-color: #b0b8e3;
+            cursor: not-allowed;
+        }
+
+        .send-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                margin: 0;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div style="display: flex; align-items: center;">
+                <div class="status-indicator"></div>
+                <h1>Assistente IA</h1>
+            </div>
+            <span id="connection-status">Conectado</span>
+        </div>
+        
+        <div class="chat-body" id="chat-body">
+            <div class="message-container">
+                <div class="message bot-message">
+                    Olá! Sou seu assistente virtual. Como posso ajudar você hoje?
+                </div>
+                <span class="message-time">Agora</span>
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="chat-footer">
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                <button class="send-button" id="send-button" disabled>
+                    <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração da conexão com o n8n
+        const N8N_API_ENDPOINT = 'https://n8n.recrutei.com.br/webhook/041b1751-6db4-455f-9378-7191b33a1d7c'; // Substitua com seu endpoint do n8n
+        
+        // Elementos DOM
+        const chatBody = document.getElementById('chat-body');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const connectionStatus = document.getElementById('connection-status');
+        
+        // Habilita/desabilita botão de envio baseado no input
+        chatInput.addEventListener('input', () => {
+            sendButton.disabled = chatInput.value.trim() === '';
+        });
+        
+        // Enviar mensagem quando Enter for pressionado
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                sendMessage();
+            }
+        });
+        
+        // Enviar mensagem quando o botão for clicado
+        sendButton.addEventListener('click', sendMessage);
+        
+        function sendMessage() {
+            const messageText = chatInput.value.trim();
+            if (messageText === '') return;
+            
+            // Adiciona a mensagem do usuário ao chat
+            addMessageToChat(messageText, 'user');
+            
+            // Limpa o input
+            chatInput.value = '';
+            sendButton.disabled = true;
+            
+            // Mostra o indicador de digitação
+            showTypingIndicator();
+            
+            // Envia a mensagem para o backend (n8n)
+            fetchBotResponse(messageText);
+        }
+        
+        function addMessageToChat(message, sender) {
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'message-container';
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}-message`;
+            messageElement.textContent = message;
+            
+            const timeElement = document.createElement('span');
+            timeElement.className = 'message-time';
+            timeElement.textContent = getCurrentTime();
+            
+            messageContainer.appendChild(messageElement);
+            messageContainer.appendChild(timeElement);
+            
+            chatBody.appendChild(messageContainer);
+            
+            // Rola para a mensagem mais recente
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'flex';
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+        
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + 
+                   now.getMinutes().toString().padStart(2, '0');
+        }
+        
+        function updateConnectionStatus(isConnected) {
+            connectionStatus.textContent = isConnected ? 'Conectado' : 'Desconectado';
+            connectionStatus.style.color = isConnected ? 'white' : '#ff6b6b';
+            
+            const statusIndicator = document.querySelector('.status-indicator');
+            statusIndicator.style.backgroundColor = isConnected ? '#2ecc71' : '#ff6b6b';
+        }
+        
+        async function fetchBotResponse(userMessage) {
+            try {
+                const requestData = {
+                    message: userMessage,
+                    userId: getUserId(), // Função para obter ID único do usuário
+                    timestamp: new Date().toISOString()
+                };
+                
+                const response = await fetch(N8N_API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha na comunicação com o servidor');
+                }
+
+                const data = await response.json();
+                const botResponse = data.response;
+                
+                // Esconde o indicador de digitação
+                hideTypingIndicator();
+                
+                // Adiciona a resposta do bot ao chat
+                addMessageToChat(botResponse, 'bot');
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                hideTypingIndicator();
+                updateConnectionStatus(false);
+                
+                // Adiciona mensagem de erro ao chat
+                addMessageToChat('Desculpe, tive um problema ao processar sua mensagem. Por favor, tente novamente mais tarde.', 'bot');
+            }
+        }
+        
+        function getUserId() {
+            // Verifica se já existe um ID de usuário no localStorage
+            let userId = localStorage.getItem('chatbot_user_id');
+            
+            // Se não existir, cria um novo ID
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('chatbot_user_id', userId);
+            }
+            
+            return userId;
+        }
+        
+        // Inicialização do chat
+        document.addEventListener('DOMContentLoaded', () => {
+            updateConnectionStatus(true);
+            chatInput.focus();
+        });
+    </script>
+</body>
+</html>
